@@ -1,3 +1,8 @@
+/**
+*  @file
+*  @copyright defined in dashboard-api/LICENSE
+ */
+
 package db
 
 import (
@@ -5,6 +10,7 @@ import (
 	"time"
 
 	"github.com/influxdata/influxdb/client/v2"
+
 	"github.com/seeleteam/dashboard-api/db/pool"
 )
 

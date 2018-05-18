@@ -1,3 +1,8 @@
+/**
+*  @file
+*  @copyright defined in dashboard-api/LICENSE
+ */
+
 package db
 
 import (
