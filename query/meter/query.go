@@ -29,8 +29,9 @@ var (
 
 // Query meter query
 type Query struct {
-	stmt string // query string
-	tag  string // flag can distinguish the data, if multi must be append with comma
+	Stmt    string      // query string
+	tag     string      // flag can distinguish the data, if multi must be append with comma
+	fillVal interface{} // if null fill val
 }
 
 // New get Query for Meter
@@ -40,19 +41,19 @@ func New(cond *query.Condition) *Query {
 		return nil
 	}
 	tag := cond.Tag
-
 	return &Query{
-		stmt: stmt,
-		tag:  tag,
+		Stmt:    stmt,
+		tag:     tag,
+		fillVal: cond.FillOption,
 	}
 }
 
 // Query query data from db for meter
 func (m *Query) Query() (res []client.Result, err error) {
-	if m.stmt == "" {
+	if m.Stmt == "" {
 		return nil, errors.New("error query stmt")
 	}
-	return db.Query(m.stmt)
+	return db.Query(m.Stmt)
 }
 
 // GetChartData get chart data
@@ -75,6 +76,10 @@ func (m *Query) generateChartLineData(inputRes []client.Result) (chartData *comm
 	}
 	res := inputRes[0]
 	lineCount := len(res.Series)
+	if lineCount == 0 {
+		return nil, nil
+	}
+
 	lineDatas := make([][]map[string]interface{}, lineCount)
 	// legend for multi lines, maybe nil when tag is blank
 	legend := make([]string, lineCount)
@@ -89,7 +94,7 @@ func (m *Query) generateChartLineData(inputRes []client.Result) (chartData *comm
 			values := seriesItem.Values
 			fmt.Printf("index:%v, name:%v, columns:%v\n", i, name, columns)
 
-			lineData := make([]map[string]interface{}, 1)
+			lineData := make([]map[string]interface{}, 0)
 			for _, val := range values {
 				lineDataItem := map[string]interface{}{
 					"time": val[0],
@@ -109,19 +114,22 @@ func (m *Query) generateChartLineData(inputRes []client.Result) (chartData *comm
 		// may multi lines
 		for i, seriesItem := range res.Series {
 			// one series one chart line or bar
-			name := seriesItem.Name
-			columns := seriesItem.Columns
-			tags := seriesItem.Tags
 			values := seriesItem.Values
+			tags := seriesItem.Tags
+			// name := seriesItem.Name
+			// columns := seriesItem.Columns
+			// fmt.Printf("index:%v, name:%v, columns:%v,tags:%v\n", i, name, columns, tags)
+			legend[i] = tags[tagName]
+			tagI := tags[tagName]
+			if tagI == "" {
+				tagI = "val"
+			}
 
-			fmt.Printf("index:%v, name:%v, columns:%v,tags:%v\n", i, name, columns, tags)
-			legend[i] = tags[m.tag]
-
-			lineData := make([]map[string]interface{}, 1)
+			lineData := make([]map[string]interface{}, 0)
 			for _, val := range values {
 				lineDataItem := map[string]interface{}{
 					"time": val[0],
-					"tag":  tags[tagName],
+					"tag":  tagI,
 					"val":  val[1],
 				}
 
@@ -130,7 +138,7 @@ func (m *Query) generateChartLineData(inputRes []client.Result) (chartData *comm
 			lineDatas[i] = lineData
 		}
 		// TODO mergeMultiLineData
-		multiLineDatas := mergeMultiLineData(lineDatas)
+		multiLineDatas := m.mergeMultiLineData(lineDatas)
 		chartData = &common.ChartLineData{
 			Legend: legend,
 			Multi:  true,
@@ -140,13 +148,11 @@ func (m *Query) generateChartLineData(inputRes []client.Result) (chartData *comm
 	return chartData, nil
 }
 
-func mergeMultiLineData(dataSet [][]map[string]interface{}) []map[string]interface{} {
+func (m *Query) mergeMultiLineData(dataSet [][]map[string]interface{}) []map[string]interface{} {
 	lineCount := len(dataSet)
 	if lineCount == 0 {
 		return nil
 	}
-	fmt.Printf("dataSet is %v\n", dataSet)
-
 	dataSize := len(dataSet[0])
 	dataSetsNew := make([]map[string]interface{}, 0)
 continueL:
@@ -159,7 +165,15 @@ continueL:
 			}
 			// fmt.Printf("data is %#v\n", data)
 			tag := data["tag"].(string)
-			innerMap[tag] = data["val"]
+			val := data["val"]
+			if val == nil {
+				switch m.fillVal {
+				case "null", "none", "linear", "previous":
+				default:
+					val = 0
+				}
+			}
+			innerMap[tag] = val
 		}
 		innerMap["time"] = dataSet[0][i]["time"].(string)
 		dataSetsNew = append(dataSetsNew, innerMap)
@@ -217,7 +231,7 @@ func generateQueryStmt(condition *query.Condition) (stmt string, err error) {
 		timeCondition.WriteString(fmt.Sprintf("time <= %s ", timeEnd))
 	} else {
 		if timeSince == "" {
-			timeSince = "30s"
+			timeSince = "5m"
 		}
 		timeCondition.WriteString(fmt.Sprintf("time >= now() - %s ", timeSince))
 	}
@@ -265,7 +279,7 @@ func generateQueryStmt(condition *query.Condition) (stmt string, err error) {
 
 	// order by default asc
 	if strings.ToLower(condition.Order) == "desc" {
-		buffer.WriteString(fmt.Sprintf("fill(%s) ", "desc"))
+		buffer.WriteString(fmt.Sprintf("order by desc "))
 	}
 
 	// limit default ?

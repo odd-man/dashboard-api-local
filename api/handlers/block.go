@@ -6,6 +6,8 @@
 package handlers
 
 import (
+	"strconv"
+
 	"github.com/gin-gonic/gin"
 
 	"github.com/seeleteam/dashboard-api/common"
@@ -15,63 +17,76 @@ import (
 
 // GetMeterLineData get meter metrics data for line chart
 func GetMeterLineData() gin.HandlerFunc {
+
 	return func(c *gin.Context) {
-		// c.Request.
 		tableName := c.Query(common.RequestMeasurement)
 		if tableName == "" {
-			c.JSON(404, gin.H{
-				"message": "tableName error for" + c.Request.URL.Path,
-			})
+			responseData := common.NewResponseData(404, "param table error", nil, c.Request.RequestURI)
+			ResponseJSON(c, responseData)
+			return
 		}
 
-		limit := c.GetInt(common.RequestLimit)
+		limit := 10
+		limitVal := c.Query(common.RequestLimit)
+		if limitVal != "" {
+			limit1, _ := (strconv.ParseInt(limitVal, 10, 10))
+			limit = int(limit1)
+		}
 		if limit <= 0 {
 			limit = 20
-
 		}
 
-		timeSince := c.GetString(common.RequestTimeSince)
-		startTime := c.GetString(common.RequestStartTime)
-		endTime := c.GetString(common.RequestEndTime)
-		fillOption := c.GetString(common.RequestFillOption)
+		timeSince := c.Query(common.RequestTimeSince)
+		startTime := c.Query(common.RequestStartTime)
+		endTime := c.Query(common.RequestEndTime)
+
+		fillOption := c.Query(common.RequestFillOption)
 		if fillOption == "" {
-			fillOption = "0"
+			fillOption = "null"
 		}
+		intervals := c.Query(common.RequestIntervals)
+		intervalsOffset := c.Query(common.RequestIntervalsOffset)
+		if intervalsOffset == "" {
+			intervalsOffset = "30s"
+		}
+		order := c.Query(common.RequestOrder)
 
-		tag := c.GetString(common.RequestTag)
-		timeZone := c.GetString(common.RequestTimeZone)
+		tag := c.Query(common.RequestTag)
+		timeZone := c.Query(common.RequestTimeZone)
 
 		condition := &query.Condition{
 			// Fields:      "stddev(count) as cc",
-			Measurement: tableName,
-			Limit:       limit,
-			TimeSince:   timeSince,
-			StartTime:   startTime,
-			EndTime:     endTime,
-			FillOption:  fillOption,
-			Tag:         tag,
-			TimeZone:    timeZone,
+			Measurement:     tableName,
+			Limit:           limit,
+			TimeSince:       timeSince,
+			StartTime:       startTime,
+			EndTime:         endTime,
+			FillOption:      fillOption,
+			Tag:             tag,
+			TimeZone:        timeZone,
+			Intervals:       intervals,
+			IntervalsOffset: intervalsOffset,
+			Order:           order,
 		}
 
 		meterQuery := meter.New(condition)
+		log.Debug("stmt: %v\n", meterQuery.Stmt)
 
 		res, err := meterQuery.Query()
 		if err != nil {
-			c.JSON(500, gin.H{
-				"message": err.Error() + c.Request.URL.Path,
-			})
+			log.Error("%v", err)
+			responseData := common.NewResponseData(500, err.Error(), nil, c.Request.RequestURI)
+			ResponseJSON(c, responseData)
+			return
 		}
 
 		chartData, err := meterQuery.GetChartData(res)
-
-		responseData := &common.ResponseData{
-			Code: 200,
-			Msg:  "",
-			Data: chartData,
-			URI:  c.Request.RequestURI,
+		if err != nil {
+			responseData := common.NewResponseData(500, err.Error(), nil, c.Request.RequestURI)
+			ResponseJSON(c, responseData)
+			return
 		}
-
-		log.Info("GetMeterLineData() response:\n%v", responseData)
-		c.JSON(200, responseData)
+		responseData := common.NewResponseData(200, "", chartData, c.Request.RequestURI)
+		ResponseJSON(c, responseData)
 	}
 }

@@ -44,4 +44,7 @@ const (
 
 	// RequestTimeZone timeZone field in request
 	RequestTimeZone = "timeZone"
+
+	// RequestSQL the sql field in request
+	RequestSQL = "sql"
 )

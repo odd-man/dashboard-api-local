@@ -31,10 +31,10 @@ func GetServer(api *API) (server *Server) {
 		api.config.ServerConfig = serverConfig
 	}
 
-	//TODO: addr http/https
 	currentEngineConfig := &EngineConfig{
 		middleware:       nil,
 		LimitConnections: api.config.LimitConnection,
+		RunMode:          api.config.RunMode,
 	}
 
 	return &Server{

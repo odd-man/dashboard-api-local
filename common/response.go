@@ -19,3 +19,13 @@ type ChartLineData struct {
 	Data   interface{} `json:"data"`   // chart line data, inner struct maybe changed with different multi value
 	Multi  bool        `json:"multi"`  // if have multi lines, this should be true, default is single line
 }
+
+// NewResponseData get the ResponseData according the fields
+func NewResponseData(code int, msg string, data interface{}, uri string) *ResponseData {
+	return &ResponseData{
+		Code: code,
+		Msg:  msg,
+		Data: data,
+		URI:  uri,
+	}
+}

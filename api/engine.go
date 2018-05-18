@@ -20,6 +20,7 @@ type EngineConfig struct {
 	middleware       []func(*gin.Context)
 	log              *log.GlobalLog
 	LimitConnections int
+	RunMode          string //runMode, ex: debug,release,test
 }
 
 // initEngineConfig init engine config
@@ -29,7 +30,7 @@ func (config *EngineConfig) initEngineConfig() *gin.Engine {
 	}
 
 	// set gin mode release(hide handlers info)
-	gin.SetMode(gin.ReleaseMode)
+	gin.SetMode(config.RunMode)
 
 	e := gin.New()
 

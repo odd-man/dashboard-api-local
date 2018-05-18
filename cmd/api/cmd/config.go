@@ -9,6 +9,8 @@ import (
 	"encoding/json"
 	"io/ioutil"
 
+	"github.com/gin-gonic/gin"
+
 	"github.com/seeleteam/dashboard-api/api"
 	"github.com/seeleteam/dashboard-api/common"
 )
@@ -74,6 +76,12 @@ func LoadConfigFromFile(configFile string) (*api.Config, error) {
 
 	apiConfig.EnableWebSocket = config.EnableWebSocket
 	apiConfig.WebSocketURL = config.WebSocketURL
+
+	runMode := config.RunMode
+	if runMode != gin.ReleaseMode && runMode != gin.DebugMode && runMode != gin.TestMode {
+		runMode = gin.ReleaseMode
+	}
+	apiConfig.RunMode = runMode
 
 	apiConfig.LimitConnection = config.LimitConnection
 	apiConfig.RootRouterPrefix = config.RootRouterPrefix

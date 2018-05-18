@@ -27,7 +27,6 @@ func Test_New(t *testing.T) {
 	fmt.Printf("Query is\n%#v\n", query)
 }
 
-// TODO
 func Test_GetChartData(t *testing.T) {
 	tagOrLegend := "addr"
 	condition := &query.Condition{

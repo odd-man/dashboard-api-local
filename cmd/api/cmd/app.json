@@ -17,6 +17,7 @@
     "DefaultHammerTime":30,
     "WebSocketURL":"/api",
     "LimitConnection":0,
+    "RunMode":"debug",
     "RootRouterPrefix":"/api/v1",
     "ServerConfig":{
       "ReadTimeout":0,

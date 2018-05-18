@@ -17,7 +17,9 @@ func InitRouters(e *gin.Engine) {
 	// set api handlers logger
 	handlers.SetAPIHandlerLog("api-handlers", common.PrintLog)
 
-	e.GET("/ping", handlers.Ping())
-	e.GET("/pong", handlers.Pong())
-	e.GET("/async", handlers.LongAsync())
+	// e.GET("/ping", handlers.Ping())
+	// e.GET("/pong", handlers.Pong())
+	// e.GET("/async", handlers.LongAsync())
+	e.GET("/getMeterLineData", handlers.GetMeterLineData())
+	e.GET("/getBySQL", handlers.GetBySQL())
 }

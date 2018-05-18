@@ -16,5 +16,5 @@ var (
 
 // SetAPIHandlerLog set api handler logger
 func SetAPIHandlerLog(name string, printLog bool) {
-	log = dlog.GetLogger("api-handlers", common.PrintLog)
+	log = dlog.GetLogger(name, common.PrintLog)
 }
