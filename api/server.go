@@ -7,9 +7,7 @@ package api
 
 import (
 	"net/http"
-	"time"
 
-	"github.com/fvbock/endless"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -72,14 +70,8 @@ func (server *Server) Run() {
 // runServer run our server in a goroutine so that it doesn't block.
 func (server *Server) runServer() {
 	server.G.Go(func() error {
-		// log.Printf("running server %v", server.config.ListenAddr)
 		server.API.log.Info("running server %v", server.config.ListenAddr)
-		if !server.config.EnableGraceful {
-			return http.ListenAndServe(server.config.ListenAddr, server.Server.Handler)
-		}
-		// Graceful restart or stop we use fvbock/endless to replace the default ListenAndServe
-		endless.DefaultHammerTime = server.config.DefaultHammerTime * time.Second
-		return endless.ListenAndServe(server.config.ListenAddr, server.Server.Handler)
+		return http.ListenAndServe(server.config.ListenAddr, server.Server.Handler)
 	})
 }
 
@@ -87,12 +79,6 @@ func (server *Server) runServer() {
 func (server *Server) runServerTLS() {
 	server.G.Go(func() error {
 		server.API.log.Info("running server TLS %v", server.config.ListenAddr)
-		// log.Printf("running server TLS %v", server.config.HTTPSAddr)
-		if !server.config.EnableGraceful {
-			return http.ListenAndServeTLS(server.config.HTTPSAddr, server.config.CertFile, server.config.KeyFile, server.Server.Handler)
-		}
-		// Graceful restart or stop we use fvbock/endless to replace the default ListenAndServeTLS
-		endless.DefaultHammerTime = server.config.DefaultHammerTime * time.Second
-		return endless.ListenAndServeTLS(server.config.HTTPSAddr, server.config.CertFile, server.config.KeyFile, server.Server.Handler)
+		return http.ListenAndServeTLS(server.config.HTTPSAddr, server.config.CertFile, server.config.KeyFile, server.Server.Handler)
 	})
 }

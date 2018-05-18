@@ -18,9 +18,10 @@ func Test_Query(t *testing.T) {
 	timeStartAgo := "3h"
 	// TIME ZONE Z0
 	// timeUnitVal := "1m"
-	intervals := "1m"
+	intervals := "10m"
+	offsetTime := ",-15s"
 	// offsetTime := ",1m"
-	offsetTime := ",-1m"
+	// offsetTime := ",-1m"
 	// tagsVal1 := "coinBase"
 	tagsVal1 := "addr"
 	// tagsVal1 := ""
@@ -31,8 +32,9 @@ func Test_Query(t *testing.T) {
 		tagsVal = "," + tagsVal1
 	}
 
-	fillVal := "none" // null
-	limitVal := 200
+	// fillVal := "none" // linear, none, null(default val), previous
+	fillVal := "0" // null
+	limitVal := 20
 	zoneVal := "tz('Asia/Shanghai')"
 	// zoneVal := ""
 	queryCount := fmt.Sprintf("select %s from \"%s\" where time >= now() - %s group by time(%s%s) %s fill(%s) limit %d %s;",

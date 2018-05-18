@@ -28,6 +28,9 @@ func (config *EngineConfig) initEngineConfig() *gin.Engine {
 		panic("engine config should not be nil")
 	}
 
+	// set gin mode release(hide handlers info)
+	gin.SetMode(gin.ReleaseMode)
+
 	e := gin.New()
 
 	// gin api handlers, used for api log info
@@ -51,8 +54,6 @@ func (config *EngineConfig) initEngineConfig() *gin.Engine {
 // Init engine init
 func (config *EngineConfig) Init() http.Handler {
 	e := config.initEngineConfig()
-	// set gin mode release(hide handlers info)
-	// gin.SetMode(gin.ReleaseMode)
 
 	// here init the routers, need refactor
 	routers.InitRouters(e)
