@@ -6,6 +6,7 @@
 package handlers
 
 import (
+	"errors"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -17,11 +18,10 @@ import (
 
 // GetMeterLineData get meter metrics data for line chart
 func GetMeterLineData() gin.HandlerFunc {
-
 	return func(c *gin.Context) {
 		tableName := c.Query(common.RequestMeasurement)
 		if tableName == "" {
-			responseData := common.NewResponseData(404, "param table error", nil, c.Request.RequestURI)
+			responseData := common.NewResponseData(404, errors.New("param table error"), nil, c.Request.RequestURI)
 			ResponseJSON(c, responseData)
 			return
 		}
@@ -29,7 +29,7 @@ func GetMeterLineData() gin.HandlerFunc {
 		limit := 10
 		limitVal := c.Query(common.RequestLimit)
 		if limitVal != "" {
-			limit1, _ := (strconv.ParseInt(limitVal, 10, 10))
+			limit1, _ := strconv.ParseInt(limitVal, 10, 10)
 			limit = int(limit1)
 		}
 		if limit <= 0 {
@@ -75,18 +75,18 @@ func GetMeterLineData() gin.HandlerFunc {
 		res, err := meterQuery.Query()
 		if err != nil {
 			log.Error("%v", err)
-			responseData := common.NewResponseData(500, err.Error(), nil, c.Request.RequestURI)
+			responseData := common.NewResponseData(500, err, nil, c.Request.RequestURI)
 			ResponseJSON(c, responseData)
 			return
 		}
 
 		chartData, err := meterQuery.GetChartData(res)
 		if err != nil {
-			responseData := common.NewResponseData(500, err.Error(), nil, c.Request.RequestURI)
+			responseData := common.NewResponseData(500, err, nil, c.Request.RequestURI)
 			ResponseJSON(c, responseData)
 			return
 		}
-		responseData := common.NewResponseData(200, "", chartData, c.Request.RequestURI)
+		responseData := common.NewResponseData(200, nil, chartData, c.Request.RequestURI)
 		ResponseJSON(c, responseData)
 	}
 }

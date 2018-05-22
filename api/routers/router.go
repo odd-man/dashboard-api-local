@@ -17,9 +17,27 @@ func InitRouters(e *gin.Engine) {
 	// set api handlers logger
 	handlers.SetAPIHandlerLog("api-handlers", common.PrintLog)
 
-	// e.GET("/ping", handlers.Ping())
-	// e.GET("/pong", handlers.Pong())
-	// e.GET("/async", handlers.LongAsync())
-	e.GET("/getMeterLineData", handlers.GetMeterLineData())
-	e.GET("/getBySQL", handlers.GetBySQL())
+	// routerGroup API
+	routerGroupAPI := e.Group("/api")
+	// base
+	routerGroupAPI.GET("/ping", handlers.Ping())
+
+	apiShowGroup := routerGroupAPI.Group("/show")
+	apiShowGroup.GET("/databases", handlers.ShowDatabases())
+	apiShowGroup.GET("/retentionPolices", handlers.ShowRetentionPolices())
+	apiShowGroup.GET("/series", handlers.ShowSeries())
+	apiShowGroup.GET("/measurements", handlers.ShowMeasurements())
+	apiShowGroup.GET("/tagKeys", handlers.ShowTagKeys())
+	apiShowGroup.GET("/tagValues", handlers.ShowTagValues())
+	apiShowGroup.GET("/fieldKeys", handlers.ShowFieldKeys())
+
+	// base sql in group api
+	apiSelectGroup := routerGroupAPI.Group("/query")
+	apiSelectGroup.GET("/sql", handlers.SelectBySQL())
+	apiSelectGroup.GET("/multiSql", handlers.SelectByMultiSQL())
+	apiSelectGroup.GET("/params", handlers.SelectWithParams())
+
+	// api demo
+	apiDemoGroup := routerGroupAPI.Group("/demo")
+	apiDemoGroup.GET("/meterData/line", handlers.GetMeterLineData())
 }
