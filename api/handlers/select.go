@@ -1,5 +1,5 @@
 /**
-*  sql ref: https://docs.influxdata.com/influxdb/v1.5/query_language/data_exploration
+*
 *
 *  @file
 *  @copyright defined in dashboard-api/LICENSE
@@ -17,9 +17,9 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/seeleteam/dashboard-api/common"
-	"github.com/seeleteam/dashboard-api/query"
-	"github.com/seeleteam/dashboard-api/query/meter"
-	"github.com/seeleteam/dashboard-api/query/origin"
+	"github.com/seeleteam/dashboard-api/db"
+	"github.com/seeleteam/dashboard-api/db/query/origin"
+	"github.com/seeleteam/dashboard-api/db/query/param"
 )
 
 // SelectBySQL get data from influxdb by influxdb sql
@@ -98,60 +98,112 @@ func SelectByMultiSQL() gin.HandlerFunc {
 // SelectWithParams select with params(generate sql)
 func SelectWithParams() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		fields := c.QueryArray(common.RequestFields)
 		tableName := c.Query(common.RequestMeasurement)
 		if tableName == "" {
-			responseData := common.NewResponseData(404, errors.New("param table error"), nil, c.Request.RequestURI)
+			errInfo := fmt.Sprintf("param %s error", common.RequestMeasurement)
+			log.Errorln(errInfo)
+			responseData := common.NewResponseData(404, errInfo, nil, c.Request.RequestURI)
 			ResponseJSON(c, responseData)
 			return
 		}
 
-		limit := 10
-		limitVal := c.Query(common.RequestLimit)
-		if limitVal != "" {
-			limit1, _ := strconv.ParseInt(limitVal, 10, 10)
-			limit = int(limit1)
-		}
-		if limit <= 0 {
-			limit = 20
-		}
-
-		timeSince := c.Query(common.RequestTimeSince)
+		whereExpressions := c.QueryArray(common.RequestWhereExpressions)
 		startTime := c.Query(common.RequestStartTime)
 		endTime := c.Query(common.RequestEndTime)
+		timeSince := c.Query(common.RequestTimeSince)
 
-		fillOption := c.Query(common.RequestFillOption)
-		if fillOption == "" {
-			fillOption = "null"
-		}
 		intervals := c.Query(common.RequestIntervals)
 		intervalsOffset := c.Query(common.RequestIntervalsOffset)
-		if intervalsOffset == "" {
-			intervalsOffset = "30s"
-		}
-		order := c.Query(common.RequestOrder)
+		tags := c.QueryArray(common.RequestTags)
 
-		tag := c.Query(common.RequestTag)
+		fillOption := c.Query(common.RequestFillOption)
+		orderBy := c.Query(common.RequestOrderBy)
+
+		limit := 0
+		limitVal := c.Query(common.RequestLimit)
+		if limitVal != "" {
+			limit1, err := strconv.ParseInt(limitVal, 10, 10)
+			if err != nil {
+				log.Error(err)
+				responseData := common.NewResponseData(404, err, nil, c.Request.RequestURI)
+				ResponseJSON(c, responseData)
+				return
+			}
+			limit = int(limit1)
+		}
+
+		offset := 0
+		offsetVal := c.Query(common.RequestOffset)
+		if offsetVal != "" {
+			offset1, err := strconv.ParseInt(limitVal, 10, 10)
+			if err != nil {
+				log.Error(err)
+				responseData := common.NewResponseData(404, err, nil, c.Request.RequestURI)
+				ResponseJSON(c, responseData)
+				return
+			}
+			offset = int(offset1)
+		}
+
+		slimit := 0
+		slimitVal := c.Query(common.RequestSLimit)
+		if slimitVal != "" {
+			slimit1, err := strconv.ParseInt(slimitVal, 10, 10)
+			if err != nil {
+				log.Error(err)
+				responseData := common.NewResponseData(404, err, nil, c.Request.RequestURI)
+				ResponseJSON(c, responseData)
+				return
+			}
+			slimit = int(slimit1)
+		}
+
+		soffset := 0
+		soffsetVal := c.Query(common.RequestSOffset)
+		if soffsetVal != "" {
+			soffset1, err := strconv.ParseInt(slimitVal, 10, 10)
+			if err != nil {
+				log.Error(err)
+				responseData := common.NewResponseData(404, err, nil, c.Request.RequestURI)
+				ResponseJSON(c, responseData)
+				return
+			}
+			soffset = int(soffset1)
+		}
+
 		timeZone := c.Query(common.RequestTimeZone)
 
-		condition := &query.Condition{
-			// Fields:      "stddev(count) as cc",
-			Measurement:     tableName,
-			Limit:           limit,
-			TimeSince:       timeSince,
-			StartTime:       startTime,
-			EndTime:         endTime,
-			FillOption:      fillOption,
-			Tag:             tag,
-			TimeZone:        timeZone,
-			Intervals:       intervals,
-			IntervalsOffset: intervalsOffset,
-			Order:           order,
+		condition := &db.Condition{
+			Fields:           fields,
+			Measurement:      tableName,
+			WhereExpressions: whereExpressions,
+			StartTime:        startTime,
+			EndTime:          endTime,
+			TimeSince:        timeSince,
+			Intervals:        intervals,
+			IntervalsOffset:  intervalsOffset,
+			Tags:             tags,
+			FillOption:       fillOption,
+			OrderBy:          orderBy,
+			Limit:            limit,
+			Offset:           offset,
+			SLimit:           slimit,
+			SOffset:          soffset,
+			TimeZone:         timeZone,
 		}
 
-		meterQuery := meter.New(condition)
-		log.Debug("stmt: %v\n", meterQuery.Stmt)
+		paramQuery, err := param.New(condition)
+		if err != nil {
+			log.Error("%v", err)
+			responseData := common.NewResponseData(500, err, nil, c.Request.RequestURI)
+			ResponseJSON(c, responseData)
+			return
+		}
 
-		res, err := meterQuery.Query()
+		log.Debug("stmt: %v\n", paramQuery.Stmt)
+
+		res, err := paramQuery.Query()
 		if err != nil {
 			log.Error("%v", err)
 			responseData := common.NewResponseData(500, err, nil, c.Request.RequestURI)

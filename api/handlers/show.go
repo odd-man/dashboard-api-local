@@ -13,7 +13,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/seeleteam/dashboard-api/common"
-	"github.com/seeleteam/dashboard-api/query/origin"
+	"github.com/seeleteam/dashboard-api/db/query/origin"
 )
 
 // ShowDatabases show database

@@ -37,7 +37,4 @@ func InitRouters(e *gin.Engine) {
 	apiSelectGroup.GET("/multiSql", handlers.SelectByMultiSQL())
 	apiSelectGroup.GET("/params", handlers.SelectWithParams())
 
-	// api demo
-	apiDemoGroup := routerGroupAPI.Group("/demo")
-	apiDemoGroup.GET("/meterData/line", handlers.GetMeterLineData())
 }
