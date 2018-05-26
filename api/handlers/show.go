@@ -70,15 +70,25 @@ func ShowSeries() gin.HandlerFunc {
 			sqlStr.WriteString(fmt.Sprintf("on %s ", db))
 		}
 
-		table := c.Query(common.RequestMeasurement)
-		if table != "" {
-			sqlStr.WriteString(fmt.Sprintf("from \"%s\" ", table))
+		measurement := c.Query(common.RequestMeasurement)
+		if measurement != "" {
+			sqlStr.WriteString(fmt.Sprintf("from \"%s\" ", measurement))
 		}
 
-		whereExp := c.Query(common.RequestWhereExpressions)
-		if whereExp != "" {
-			// format like: WHERE <tag_key> <operator> [ '<tag_value>' | <regular_expression>]
-			sqlStr.WriteString(fmt.Sprintf("where %s ", whereExp))
+		// format like: [WHERE <tag_key> <operator> [ '<tag_value>' | <regular_expression>]]
+		whereExps := c.QueryArray(common.RequestWhereExpressions)
+		if whereExps != nil && len(whereExps) != 0 {
+			var _count int
+			for _, whereExp := range whereExps {
+				if whereExp != "" {
+					if _count == 0 {
+						sqlStr.WriteString(fmt.Sprintf("where %s ", whereExp))
+
+					} else {
+						sqlStr.WriteString(fmt.Sprintf("and %s ", whereExp))
+					}
+				}
+			}
 		}
 
 		limitVal := c.Query(common.RequestLimit)
@@ -145,10 +155,20 @@ func ShowMeasurements() gin.HandlerFunc {
 			sqlStr.WriteString(fmt.Sprintf("with measurement %s ", withExp))
 		}
 
-		whereExp := c.Query(common.RequestWhereExpressions)
-		if whereExp != "" {
-			// format like: WHERE <tag_key> <operator> [ '<tag_value>' | <regular_expression>]
-			sqlStr.WriteString(fmt.Sprintf("where %s ", whereExp))
+		// format like: [WHERE <tag_key> <operator> [ '<tag_value>' | <regular_expression>]]
+		whereExps := c.QueryArray(common.RequestWhereExpressions)
+		if whereExps != nil && len(whereExps) != 0 {
+			var _count int
+			for _, whereExp := range whereExps {
+				if whereExp != "" {
+					if _count == 0 {
+						sqlStr.WriteString(fmt.Sprintf("where %s ", whereExp))
+
+					} else {
+						sqlStr.WriteString(fmt.Sprintf("and %s ", whereExp))
+					}
+				}
+			}
 		}
 
 		limitVal := c.Query(common.RequestLimit)
@@ -188,7 +208,7 @@ func ShowMeasurements() gin.HandlerFunc {
 
 		res, err := query.Query()
 		if err != nil {
-			log.Error("ShowMeasurements, err:\n%v\n")
+			log.Error("ShowMeasurements, err: %v", err)
 			responseData := common.NewResponseData(500, err, res, c.Request.RequestURI)
 			ResponseJSON(c, responseData)
 			return
@@ -209,15 +229,25 @@ func ShowTagKeys() gin.HandlerFunc {
 			sqlStr.WriteString(fmt.Sprintf("on %s ", db))
 		}
 
-		table := c.Query(common.RequestMeasurement)
-		if table != "" {
-			sqlStr.WriteString(fmt.Sprintf("from \"%s\" ", table))
+		measurement := c.Query(common.RequestMeasurement)
+		if measurement != "" {
+			sqlStr.WriteString(fmt.Sprintf("from \"%s\" ", measurement))
 		}
 
-		whereExp := c.Query(common.RequestWhereExpressions)
-		if whereExp != "" {
-			// format like: WHERE <tag_key> <operator> [ '<tag_value>' | <regular_expression>]
-			sqlStr.WriteString(fmt.Sprintf("where %s ", whereExp))
+		// format like: [WHERE <tag_key> <operator> [ '<tag_value>' | <regular_expression>]]
+		whereExps := c.QueryArray(common.RequestWhereExpressions)
+		if whereExps != nil && len(whereExps) != 0 {
+			var _count int
+			for _, whereExp := range whereExps {
+				if whereExp != "" {
+					if _count == 0 {
+						sqlStr.WriteString(fmt.Sprintf("where %s ", whereExp))
+
+					} else {
+						sqlStr.WriteString(fmt.Sprintf("and %s ", whereExp))
+					}
+				}
+			}
 		}
 
 		limitVal := c.Query(common.RequestLimit)
@@ -278,9 +308,9 @@ func ShowTagValues() gin.HandlerFunc {
 			sqlStr.WriteString(fmt.Sprintf("on %s ", db))
 		}
 
-		table := c.Query(common.RequestMeasurement)
-		if table != "" {
-			sqlStr.WriteString(fmt.Sprintf("from %s ", table))
+		measurement := c.Query(common.RequestMeasurement)
+		if measurement != "" {
+			sqlStr.WriteString(fmt.Sprintf("from \"%s\" ", measurement))
 		}
 
 		withExp := c.Query(common.RequestWithExpression)
@@ -294,10 +324,20 @@ func ShowTagValues() gin.HandlerFunc {
 		// WITH KEY [ [<operator> "<tag_key>" | <regular_expression>] | [IN ("<tag_key1>","<tag_key2")]]
 		sqlStr.WriteString(fmt.Sprintf("with key %s ", withExp))
 
-		whereExp := c.Query(common.RequestWhereExpressions)
-		if whereExp != "" {
-			// format like: WHERE <tag_key> <operator> [ '<tag_value>' | <regular_expression>]
-			sqlStr.WriteString(fmt.Sprintf("where %s ", whereExp))
+		// format like: [WHERE <tag_key> <operator> [ '<tag_value>' | <regular_expression>]]
+		whereExps := c.QueryArray(common.RequestWhereExpressions)
+		if whereExps != nil && len(whereExps) != 0 {
+			var _count int
+			for _, whereExp := range whereExps {
+				if whereExp != "" {
+					if _count == 0 {
+						sqlStr.WriteString(fmt.Sprintf("where %s ", whereExp))
+
+					} else {
+						sqlStr.WriteString(fmt.Sprintf("and %s ", whereExp))
+					}
+				}
+			}
 		}
 
 		limitVal := c.Query(common.RequestLimit)
@@ -357,9 +397,9 @@ func ShowFieldKeys() gin.HandlerFunc {
 		if db != "" {
 			sqlStr.WriteString(fmt.Sprintf("on %s ", db))
 		}
-		table := c.Query(common.RequestMeasurement)
-		if table != "" {
-			sqlStr.WriteString(fmt.Sprintf("from \"%s\" ", table))
+		measurement := c.Query(common.RequestMeasurement)
+		if measurement != "" {
+			sqlStr.WriteString(fmt.Sprintf("from \"%s\" ", measurement))
 		}
 
 		query := origin.New(sqlStr.String())

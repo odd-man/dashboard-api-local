@@ -12,6 +12,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/seeleteam/dashboard-api/api/routers"
+	"github.com/seeleteam/dashboard-api/db"
 	"github.com/seeleteam/dashboard-api/log"
 )
 
@@ -56,6 +57,8 @@ func (config *EngineConfig) initEngineConfig() *gin.Engine {
 func (config *EngineConfig) Init() http.Handler {
 	e := config.initEngineConfig()
 
+	// init the db
+	db.Init()
 	// here init the routers, need refactor
 	routers.InitRouters(e)
 	return e

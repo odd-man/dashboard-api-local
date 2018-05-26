@@ -95,6 +95,7 @@ func generateQueryStmt(condition *db.Condition) (stmt string, err error) {
 	// where condition, should not include time section
 	var whereConditionBuffer bytes.Buffer
 	whereExpressions := condition.WhereExpressions
+
 	if whereExpressions != nil && len(whereExpressions) != 0 {
 		// each must one condition, not support multi nest
 		for _, whereExpression := range whereExpressions {

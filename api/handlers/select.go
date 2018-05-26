@@ -28,7 +28,7 @@ func SelectBySQL() gin.HandlerFunc {
 		sql := c.Query(common.RequestSQL)
 		if sql == "" {
 			errInfo := fmt.Sprintf("param field sql required!")
-			log.Errorln(errInfo)
+			log.Error(errInfo)
 			responseData := common.NewResponseData(500, errors.New(errInfo), nil, c.Request.RequestURI)
 			ResponseJSON(c, responseData)
 			return
@@ -55,7 +55,7 @@ func SelectByMultiSQL() gin.HandlerFunc {
 
 		if sqls == nil || len(sqls) == 0 {
 			errInfo := fmt.Sprintf("param field sqls required!")
-			log.Errorln(errInfo)
+			log.Error(errInfo)
 			responseData := common.NewResponseData(400, errors.New(errInfo), nil, c.Request.RequestURI)
 			ResponseJSON(c, responseData)
 			return
@@ -74,7 +74,7 @@ func SelectByMultiSQL() gin.HandlerFunc {
 		}
 		if sqlStr.String() == "" {
 			errInfo := fmt.Sprintf("param field sqls content error")
-			log.Errorln(errInfo)
+			log.Error(errInfo)
 			responseData := common.NewResponseData(500, errors.New(errInfo), nil, c.Request.RequestURI)
 			ResponseJSON(c, responseData)
 			return
@@ -101,8 +101,8 @@ func SelectWithParams() gin.HandlerFunc {
 		fields := c.QueryArray(common.RequestFields)
 		tableName := c.Query(common.RequestMeasurement)
 		if tableName == "" {
-			errInfo := fmt.Sprintf("param %s error", common.RequestMeasurement)
-			log.Errorln(errInfo)
+			errInfo := fmt.Sprintf("param %s blank", common.RequestMeasurement)
+			log.Error(errInfo)
 			responseData := common.NewResponseData(404, errInfo, nil, c.Request.RequestURI)
 			ResponseJSON(c, responseData)
 			return

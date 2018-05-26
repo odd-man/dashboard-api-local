@@ -13,12 +13,14 @@ import (
 
 	"github.com/seeleteam/dashboard-api/api"
 	"github.com/seeleteam/dashboard-api/common"
+	"github.com/seeleteam/dashboard-api/db"
 )
 
 // Config aggregates all configs exposed to users
 // Note to add enough comments for every field
 type Config struct {
 	api.Config
+	DB *db.Config
 
 	DisableConsoleColor bool
 
@@ -102,5 +104,16 @@ func LoadConfigFromFile(configFile string) (*api.Config, error) {
 
 	apiConfig.ServerConfig = serverConfig
 
+	// db config
+	dbConfig := config.DB
+	if dbConfig != nil {
+		db.DBNAME = dbConfig.NAME
+		db.DBAddr = dbConfig.Addr
+		db.DBUsername = dbConfig.Username
+		db.DBPassword = dbConfig.Password
+		db.DBInitialSize = dbConfig.InitialSize
+		db.DBMaxActive = dbConfig.MaxActive
+		db.DBIdleTimetout = dbConfig.IdleTimetout
+	}
 	return apiConfig, nil
 }

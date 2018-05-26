@@ -75,37 +75,37 @@ func (m *GlobalLog) Error(f interface{}, args ...interface{}) {
 
 // Debugln wrapper Debugln logger
 func (m *GlobalLog) Debugln(v ...interface{}) {
-	m.log.Debugln(v...)
+	m.log.Debug(fmt.Sprintln(v...))
 }
 
 // Infoln wrapper Infoln logger
 func (m *GlobalLog) Infoln(args ...interface{}) {
-	m.log.Infoln(args...)
+	m.log.Info(fmt.Sprintln(args...))
 }
 
 // Warnln wrapper Warnln logger
 func (m *GlobalLog) Warnln(args ...interface{}) {
-	m.log.Warnln(args...)
+	m.log.Warn(fmt.Sprintln(args...))
 }
 
 // Printfln wrapper Printfln logger
 func (m *GlobalLog) Printfln(args ...interface{}) {
-	m.log.Println(args...)
+	m.log.Print(fmt.Sprintln(args...))
 }
 
 // Panicln wrapper Panicln logger
 func (m *GlobalLog) Panicln(args ...interface{}) {
-	m.log.Panicln(args...)
+	m.log.Panic(fmt.Sprintln(args...))
 }
 
 // Fatalln wrapper Fatalln logger
 func (m *GlobalLog) Fatalln(args ...interface{}) {
-	m.log.Fatalln(args...)
+	m.log.Fatal(fmt.Sprintln(args...))
 }
 
 // Errorln wrapper Errorln logger
 func (m *GlobalLog) Errorln(args ...interface{}) {
-	m.log.Errorln(args...)
+	m.log.Error(fmt.Sprintln(args...))
 }
 
 // Options config the logger

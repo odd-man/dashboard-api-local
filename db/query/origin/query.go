@@ -9,6 +9,7 @@ import (
 	"errors"
 
 	"github.com/influxdata/influxdb/client/v2"
+
 	"github.com/seeleteam/dashboard-api/db"
 )
 

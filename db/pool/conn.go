@@ -18,8 +18,6 @@ type Config struct {
 	InitialSize int
 	// the max conn size
 	MaxActive int
-	// the min idele conn size
-	MinIdle int
 
 	Factory func() (interface{}, error)
 	Close   func(interface{}) error

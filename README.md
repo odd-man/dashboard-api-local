@@ -8,6 +8,12 @@
 go 1.10+
 ```
 
+>needed
+
+```text
+influxdb 1.5.1+
+```
+
 ## Project structure
 
 ```text

@@ -63,7 +63,6 @@ func (server *Server) Run() {
 	}
 	if err := server.G.Wait(); err != nil {
 		server.API.log.Fatalln(err)
-		// log.Fatal(err)
 	}
 }
 

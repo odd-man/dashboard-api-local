@@ -24,5 +24,14 @@
       "WriteTimeout":0,
       "IdleTimeout":0,
       "MaxHeaderBytes":1048576
+    },
+    "DB":{
+      "Name":"influxdb",
+      "Addr":"http://localhost:8086",
+      "UserName":"test",
+      "Password":"test123",
+      "DBInitialSize":0,
+      "DBMaxActive":0,
+      "DBIdleTimetout":0
     }
   }
